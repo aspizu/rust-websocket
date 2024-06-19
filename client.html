@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Rust websocket chat</title>
+    </head>
+    <body>
+        <h1>Rust websocket chat</h1>
+        <input id="username" type="text" placeholder="username" />
+        <input id="message" type="text" placeholder="message" />
+        <button id="send">Send</button>
+        <ul id="messages"></ul>
+        <script>
+            function addChatMessage(username, message) {
+                const messages = document.getElementById("messages")
+                const messageElement = document.createElement("li")
+                messageElement.innerText = `${username}: ${message}`
+                messages.appendChild(messageElement)
+            }
+            const ws = new WebSocket("ws://127.0.1:8000")
+            ws.onmessage = async (event) => {
+                const data = JSON.parse(await event.data.text())
+                addChatMessage(data.username, data.message)
+            }
+            document.getElementById("send").addEventListener("click", () => {
+                const username = document.getElementById("username").value
+                const message = document.getElementById("message").value
+                ws.send(JSON.stringify({username, message}))
+                addChatMessage(username, message)
+            })
+        </script>
+    </body>
+</html>
